@@ -1,0 +1,360 @@
+
+>>>>>>>>>>>>>>>>>>>>>>>  numpy notes  <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+NUMPY stands for NUMerical PYthon. numpy is faster than python lists because unlike lists :
+1. numpy stores values of homogenous types. 
+2. numpy requires less space to store the values. 
+3. numpy uses contiguous memory to store data unlike python lists.
+
+
+pip install numpy  : to install numpy
+
+import numpy as np
+arr1 = np.array([1,2,3])
+arr2 = np.array([4,5,6])
+arr1*arr2    # [4,10,18]
+
+
+np.nan	     # "None" type in numpy
+
+arr1.ndim    # to check the dimensions of the array
+
+arr1.shape   # to check the shape of the array
+
+arr1.dtype   # to check the datatypes of the values
+
+
+arr1 = np.array([1,2,3],dtype='int16')
+arr1.dtype    # int16
+
+int is 'int32' by default
+
+arr1.itemsize    # size of each element
+
+arr1.size        # total number of elements
+
+arr1.itemsize * arr1.size      # to get the total memory size of the array in bytes
+or
+arr1.nbytes
+
+np.arange(10) : to create a numpy range operator
+
+np.linspace(1,10,20) : to get 20 values from 1 to 10 which are equally spaced
+
+np.empty((3,4)) : to get an empty array of size 3*4 with random values which can be replaced 
+	afterwards
+
+emp_like = np.empty_like(lin) : to copy and create an array's size and fill that with random values
+
+iden = np.identity(5) / np.eye(5) : to create an identity matrix of order 5*5
+
+rng : a 1-D array with 10 elements
+
+ar.T : to get the transpose of the array 
+
+ar.T.T : returns the original array
+
+ar.transpose() or np.transpose(ar) also works the same way (return transpose)
+
+ar.flat : returns a iterator having the array values as the values
+
+for i in ar.flat:
+    print(i)
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> axes <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+numpy axes :				pandas axes :
+
+1  >>> row				1  >>> column
+0  >>> column				0  >>> row	
+
+
+#--------------------------------------------------------------------------------------
+
+ar.ravel() / np.ravel(ar) : to convert the array into a 1-D array
+
+np.sqrt(ar) : to get the square roots of the values 
+
+np.sort(ar) : to sort the values in ascending order
+
+-np.sort(-ar) : to sort the values in descending order
+
+np.nonzero(ar7) : to get the tuple indexed values where a non-zero value is there in the array
+
+np.count_nonzero(ar7) : to count the non-zero values in the array 
+
+
+>>>>>>>>>>>>>>>>>>>>> accessing/changing the values [r,c] <<<<<<<<<<<<<<<<<<<<<<<<<<
+
+arr = np.array([
+		  [1,2,3,4,5,6,7],
+		  [8,9,10,11,12,13,14]
+		])
+
+arr[1,5]  	        # 13
+
+arr[0,:]  	        # [1,2,3,4,5,6,7]
+
+arr[:,2]  	        # [3,10]
+
+arr[0,1::2]  		# [2,4,6]
+
+arr[1,5] = 20  		# 13 will be changed to 20
+
+arr[:,2] = 5		# setting all the third column values to 5
+or
+arr[:,2] = [5]		# setting all the third column values to 5
+
+arr[:,2] = [10,20]      # setting the columns through list
+
+zero = np.zeros(5)		# creating a zero matrix of order 5*1
+
+zero = np.zeros((2,3))		# creating a zero matrix of order 2*3
+
+iden = np.ones(5)		# creating an identity matrix of order 5*1
+
+iden = np.ones((2,3))		# creating an identity matrix of order 2*3
+
+iden = np.ones((2,3),dtype='int32')	# creating an identity matrix of order 2*3
+					# of int type values
+
+full = np.full((3,3),99)	# creating a matrix of order 3*3 with only 99 as the values
+
+full = np.full(arr.shape,88)    # using any other array's shape
+
+rndom = np.random.random((2,3))       # array of random numbers
+
+rndom = np.random.random(arr.shape)   # using any other array's size
+
+np.random.randint(4,7,size=(3,4))            # array of random integers
+or
+np.random.randint(low=4,high=7,size=(3,4))
+
+low >>>>> inclusive
+high >>>> exclusive
+
+iden = np.identity(4)		# identity matrix of order 4
+
+
+>>>>>>>>>>>>>>>>>>>>>> shallow copy vs deep copy <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+arr1 = np.array([1,2,3])
+arr2 = arr1                     # deep copy
+arr2[0] = 100
+print(arr2[0])			# 100
+print(arr1[0])			# 100    (not desired)
+
+
+arr1 = np.array([1,2,3])
+arr2 = arr1.copy()              # shallow copy
+arr2[0] = 100
+print(arr2[0])			# 100
+print(arr1[0])			# 1    (correct)
+
+
+#--------------------------------------------------------------------------------------
+
+element wise operations are possible 
+
+arr1 = np.array([1,2,3])        
+arr1 + 2			# [3,4,5]
+
+
+arr1 = np.full((2,3),1)
+arr2 = np.full((3,2),2)
+print(arr1)
+print(arr2)
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>> matrix multiplication <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+np.matmul(arr1,arr2)		 
+or
+arr1@arr2			
+
+
+>>>>>>>>>>>>>>>>>>>>>>>> max, min, sum inside an array <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+matrix = np.array([
+			[1,2,3],
+			[4,5,6],
+			[7,8,9]
+		])
+
+
+>>>>>>>>> if indexes need to be found out
+
+np.argmax(matrix,axis=0) 	# returns the index of the maximum value (column-wise)
+
+np.argmin(matrix,axis=1) 	# returns the index of the minimum value (row-wise)
+
+np.argsort(matrix) 		# returns the indexes in the sorted order
+				# sorting is done by default on row (axis=1)
+
+>>>>>>>>> if values need to be found out
+
+print(np.max(matrix,axis=1)) 		# to get the maximum in all the rows
+
+print(np.min(matrix,axis=0))		# to get the minimum in all the columns
+
+print(np.sum(matrix))			# to get the sum of all the elements
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>> reshaping <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+matrix = np.array([
+			[1,2,3,4],
+			[5,6,7,8]
+		  ])
+
+print(matrix)
+print(matrix.reshape((4,2)))
+
+
+>>>>>>>>>>>>>>>>>>>>>>> vstack and hstack <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+# vstack :
+
+v1 = np.array([1,2,3,4])
+v2 = np.array([5,6,7,8])
+np.vstack((v1,v2))		# array([[1, 2, 3, 4],
+       					[5, 6, 7, 8]])
+
+
+# hstack :
+
+v1 = np.array([1,2,3,4])
+v2 = np.array([5,6,7,8])
+np.hstack((v1,v2))		# array([1, 2, 3, 4, 5, 6, 7, 8])
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> reading from a file <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+filedata = np.genfromtxt('data.txt',delimiter=',')
+filedata.astype('int32')
+
+
+>>>>>>>>>>>>>>>>>>>>>>> advanced indexing (through filters) <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+arr > 50  	# True will be returned for the values greater than 50 else False
+
+arr[arr > 50]	# returns the values greater than 5
+
+arr = np.array([ 1,  2,  3,  4,  5,  6,  7])
+arr[[2,3,5]]	# accessing the elements using a list
+		# array([3, 4, 6])
+
+
+>>>>>>>>>>>>>>>>>>>>>>>> AND, OR, NOT <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+((data > 30 ) & (data < 100))     	# AND (&)
+
+((data > 30 ) | (data < 100))     	# OR (|)
+
+(~((data > 30 ) & (data < 100)))  	# NOT (~)
+
+
+>>>>>>>>>>>>>>>>>>>> maping each row with each column separately <<<<<<<<<<<<<<<<<<<<
+
+arr = np.array([
+    [1,2,3,4,5],
+    [6,7,8,9,10],
+    [11,12,13,14,15],
+    [16,17,18,19,20]
+    
+])
+
+arr[:,[1,2]]  		# array([[ 2,  3],
+      				 [ 7,  8],
+   				 [12, 13],
+       				 [17, 18]])
+
+arr[[0,1],[1,2]]	# array([2, 8])       # similar to lst[0][1] and lst[1][2]
+
+
+#-------------------------------------------------------------------------------------
+
+lst = np.array([1,2,3,4,5])
+print(type(lst)) 	# numpy array
+lst = lst.tolist()	# converted to a python list
+print(type(lst))	# python list
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>> array broadcasting <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+arr = np.random.randint(1,100,30)
+print(arr)
+
+array([ 2, 37, 50, 14, 16, 71,  3, 84, 88, 41, 38, 26, 30, 32, 99, 54, 70,
+       57, 61,  5, 18, 91, 57, 19,  2, 15, 30, 58, 30, 39])
+
+
+
+arr[3:] = 100
+
+array([  2,  37,  50, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100,
+       100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100,
+       100, 100, 100, 100])
+
+
+
+arr[3:6] = 100
+
+array([  2,  37,  50, 100, 100, 100,   3,  84,  88,  41,  38,  26,  30,
+        32,  99,  54,  70,  57,  61,   5,  18,  91,  57,  19,   2,  15,
+        30,  58,  30,  39])
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>> np.where <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+to replace with a value at filtered places
+
+arr = np.array([
+    [11,12,3,4,5],
+    [6,17,8,19,10],
+    [11,2,3,14,15],
+    [16,17,18,19,20]    
+])
+
+np.where(arr > 10,"Large","Small")
+
+
+Output:
+
+array([['Large', 'Large', 'Small', 'Small', 'Small'],
+       ['Small', 'Large', 'Small', 'Large', 'Small'],
+       ['Large', 'Small', 'Small', 'Large', 'Large'],
+       ['Large', 'Large', 'Large', 'Large', 'Large']], dtype='<U5')
+
+
+>>>>>>>>>>>>>>>>>>> adding, updating and deleting elements <<<<<<<<<<<<<<<<<<
+
+
+array = np.array([1, 2, 3, 4, 5])
+
+array = np.append(array,6)			# adding a single element
+
+array = np.append(array,[7,8,9,10])		# adding multiple elements
+
+array[5] = 66					# updating element at index 5
+
+array = np.delete(array,1)			# deleting element at index 1
+
+array = np.delete(array,[1,2,3])		# deleting elements at index 1,2,3
+
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> End of numpy <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+

@@ -1,0 +1,323 @@
+
+ >>>>>>>>>>>>  GIT commands  <<<<<<<<<<<<<<
+
+
+
+ls : list of directories
+
+echo "this is sample file" > sample.txt :  to create a file with some text
+
+rm -rf .git : to remove a folder 
+
+ls -la : to get the list of hidden directories as well
+
+pwd : current path
+
+git config --global user.name "username" : to set username
+
+git config --global user.email "email" : to set email
+	
+git config --global user.name : to check username
+
+git config --global user.email : to check email
+
+git config --list : to get the list of username and email
+
+git config --unset --global user.name : to remove the username
+
+git config --unset --global user.email : to remove the email
+
+git help "command_name"/ git "command_name" --help :  to get help of any git command
+
+code . : to run visual studio code
+
+git init : to initialize git (for the first time)
+
+ls -lart : to show all the folders and files (including hidden ones)
+
+git status : to check the status of git (whether there is any untracked file or not)
+
+git add "filename" : to add the file in staging area
+
+atleast one "git commit" is required to start the tracking of the project. This is known as initial
+commit.
+
+now enter the comments for commit and press esc -> :wq  to exit
+
+touch "filename" : to create the file 
+
+git add -A  (staging all the files and folders present in any folder inside a git repository at once)
+
+git add -u  (staging all the files and folders present in any folder excluding untracked
+	     files inside a git repository at once)
+
+git add . (staging all the files and folders of the current directory only)
+
+git commit -m "your comments here" : to commit without opening vim editor
+
+clear : to clear the terminal
+
+git checkout "filename" : to rollback the changes and bring the file to the last commit present on the
+			  git server
+
+git checkout -f : to rollback the changes and bring all the files to the last commit present on the git
+                  server
+
+git log : shows all the latest commits
+
+git log -p -5 : shows last 5 commits
+
+git log --grep "<<keyword>>" : to check a commit message having a particular keyword
+
+press q to exit the git log
+
+git diff : it compares the working directory with the local repository.
+
+git diff --staged : it compares the staged area with the local repository.
+ 
+{
+
+Special case :
+
+Suppose a file is staged. But instead of committing the changes, the file is changed
+once again. In this case, both the versions of the file i.e. staged as well as modified
+one will be available. 
+Usual practice is to stage the file once again and then committing the changes.
+However, it is always better to check the changes.
+Doing a "git diff --staged" will compare staged version with the local repository but
+"git diff" instead of comparing the working directory and local repository, it will 
+compare the working directory and staged area assuming staged area as a local repository.
+Once the contents are compared (present in working directory and staged area), they are
+staged. However, there are chances that the contents are modified once again. Now also,
+"git diff" instead of comparing the working directory and local repository, would compare
+staged area (modified just now) and working directory. If satisfied, we can now add the 
+contents to the staging area and commit the changes.
+
+}
+
+
+git commit -a -m "comments here" : to directly committing a file without pushing it to the staged area
+
+crtl + c : to cancel a wrongly typed command
+
+git rm --cached "filename" : to move the files one by one from "staged" area to the "untracked" status.
+				(removing a file from staging area)
+
+git rm "filename" : to delete a file and stage it at the same time
+
+git mv "previous_name" "new_name" :  to rename a file and stage it at the same time
+ 
+Staged area is the place where the file reaches when it is created, updated or deleted and we
+need to save the changes permanently.
+
+git status -s : short status
+
+A -> new file
+
+M(green) -> staged file
+
+M(red) -> modified file
+
+M(green)M(red) -> both appears when the file was staged initially but after some time, some changes
+                  were done and hence, the file is in modified stage now. Once staged again, the red M
+                  disappears meaning the file is staged again.
+
+D -> Deleted File
+
+.gitignore : It is a special type of file which is used to ignore some files. Simply write the names
+             of the files to be ignored in this file. However, this file itself is tracked and treated
+             as a normal file.
+             Eg. Writing "mylogs.log" in .gitignore file will not even track the file and it will 
+	     ignore all the instances of the files having this name even if the files are present in 
+	     any folder.
+	     "/mylogs.log" will ignore the file present in the same path where .gitignore file is
+	     present.
+
+writing *.log in gitignore : to ignore all the files with extensions ".log"
+
+foldername/ : to ignore a folder
+
+branch : to create a copy of the project and then we can work on that copy without affecting the 
+	 original project.
+
+git branch : to get the list of local branches
+
+git branch -a : to get the list of local as well as remote branches
+
+git branch "branch_name" : to create a branch 
+
+git checkout "branch_name" : to enter a particular branch
+
+git checkout file1.txt  (to rollback the changes to the last commit of a single file)
+
+git checkout -f  (to rollback the changes to the last commit of all the files)
+
+git checkout master : to go to the master branch. Changes of previous branch (even the committed ones) will be
+		      reverted and the contents of the master branch will be seen. Contents of
+		      the previous branch will be lost temporarily (as they will be available in that
+		      branch only)
+
+git checkout -b "branch2" : to create a new branch and enter it simultaneously
+
+git remote add "alias for url" "URL" : to link the local repository (present on the system) with the
+				       remote repository (which is created on github) so that the code
+				       can further be pushed. This alias will represent the URL.
+
+Eg. git remote add origin https://github.com/akaroshaa/sample.git
+
+git remote set-url origin https://github.com/akaroshaa/sample.git  : to change the remote origin url
+
+git remote remove origin : to remove the remote origin url
+
+git remote : list of aliases linked with the repositories  
+
+git remote -v : to check the remote origin url
+
+git pull origin master : to get the latest version of code from the server 
+
+
+SSH key is required to add a device(PC) which will be used to interact with remote repo
+
+git push -u "alias" "branch_name" : to push the branch. Next time we just need to use "git push"
+				    command and the content would be pushed in the branch in which it
+				    was pushed last.
+
+git push : to push in the last pushed branch.
+
+git clone "URL" "name with which to be cloned" : to clone the remote repo into our system. 
+						 If no name is given, the code is cloned with the
+						 repo name only.
+
+
+>>>>>>>>>>>>>>>>>> changing commit message <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+git commit --amend -m "added two files"  (to override the last commit message)
+
+git commit --amend  (to make a file part of the last commit)
+
+git log --stat   (to check the file last added in the last commit)
+
+git log -1	(to check the last commit)
+
+git log -2	(to check the last 2 commits)
+
+git show <<commit_hash>>	(to check the committed changes)
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  merging a branch <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+git branch br1  (create a branch)
+
+git checkout br1  (enter that branch)
+
+made some changes and committed the same
+
+git push -u origin br1  (pushed that branch into remote repo)
+
+git checkout master  (checked into master branch)
+
+git pull origin master  (got the latest code)
+
+git merge br1  (to merge the branch with master branch of local master repo)
+
+git push -u origin master  (to push the changes into remote master repo)
+
+git branch -d br1  (to delete the branch from local repo)
+
+git push -u origin -d br1  (to delete the branch from remote repo)
+
+
+>>>>>>>>>>>>>>> checking merged and non-merged branches <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+git branch --merged  (to check the already merged branches which are ready to be deleted)
+
+git branch --no-merged  (to check the branches which are not yet merged and hence to be merged)
+
+
+>>>>>>>>>>>>>>>>>>> forcefully deleting non-merged branches <<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+git branch -d br1  (branch is not deleted if not merged yet)
+
+git branch -D br1  (forceful delete, branch is deleted even if not merged yet)
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> handling incorrect commits <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+git checkout br1  (desired branch)
+
+git cherry-pick "hash"  (however it doesn't remove the commit done in the wrong branch. To remove it
+			 from the wrong branch, we need to do the reset)
+
+reset is of 3 types :
+
+1. soft  (it keeps the changes in the staging area. However, untracked files are still kept)
+
+git reset --soft "hash"
+
+
+2. mixed  (It is done by default. It removes the changes from the staging area. However, 
+	   untracked files are still kept)
+
+git reset --mixed "hash" 
+or
+git reset "hash"
+
+
+3. hard  (It doesn't keep the changes at all. However, untracked files are still kept)
+
+git reset --hard "hash"
+
+
+*** prefer hard reset to delete the commits 
+
+
+git clean -df  (to clear untracked files. However, file will be deleted from the system as well)
+
+
+git reflog : to get the latest commits
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> revert <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+to undo the last commit and jumping ahead of 1 commit
+
+git revert <<commit_hash>>
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> tags <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+tags can be used for easy search of the commits
+
+git tag -a <<tag_name>> -m "comments" <<commit_hash>>
+
+git show <<tag_name>> : to search for a commit
+
+git tag -d <<tag_name>> : to delete a tag
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> stashing <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+git stash save "stashing message" : to save the changes temporarily
+
+git stash list : to get the stashes list
+
+git stash apply stash@{0} : to apply the stashed changes (stash remains there)
+
+git stash pop : apply the changes at the latest stash and drop the stash
+
+git stash drop stash@{0} : to drop the stashed changes (stash remains there)
+
+git stash clear : to clear all the stashes
+
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> End of GIT <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+

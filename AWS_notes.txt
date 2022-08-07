@@ -1,0 +1,361 @@
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  AWS notes  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+to connect SSH from windows 10 >>>>
+
+cmd > ssh -i C:\Users\HP\Downloads\hp_linux.pem ec2-user@18.217.74.224
+
+
+>>>>>>>>>>>>>>>>>>>>>>> use of elastic IP <<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+even after restarting the EC2, the public IP remains same
+
+
+>>>>>>>>>>>>>>>>>>>>>>> installing apache on ec2 <<<<<<<<<<<<<<<<<<<<<
+
+cmd > sudo su
+
+yum update -y
+
+yum install -y httpd.x86_64
+
+systemctl start httpd.service
+
+systemctl enable httpd.service
+
+curl localhost:80
+
+open HTTP port from security group and open the server using the public IP
+
+echo "Hello World" > /var/www/html/index.html
+
+echo "Hello World from $(hostname -f)" > /var/www/html/index.html
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> bootstrap commands <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+#!/bin/bash
+# install httpd (Linux 2 version)
+yum update -y
+yum install -y httpd.x86_64
+systemctl start httpd.service
+systemctl enable httpd.service
+echo "Hello World from $(hostname -f)" > /var/www/html/index.html
+
+
+=====================================================================================================
+
+
+use any existing security group having http port open
+
+select any existing key pair
+
+
+
+git config --global http.version HTTP/1.1
+
+git config --global http.postBuffer 524288000
+
+
+
+
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Essentials <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+Connection to a Windows machine can be done using RDP (Remote Desktop Protocol). 
+
+Connection to a Linux machine can be done using Putty or SSH present in windows
+
+Putty >>>>>>>>>>>>> through .pem and .ppk files
+
+SSH >>>>>>>>>>>>>> ssh -i C:\Users\HP\Downloads\hp_linux.pem ec2-user@18.217.74.224
+
+
+Bootstrapped commands (needs to be executed to declare that its a web server) :
+
+
+#!/bin/bash
+sudo su
+yum update -y
+yum install httpd -y
+cd /var/www/html
+echo "Machine 1" > index.html
+service httpd start
+chkconfig httpd on 
+
+
+
+#!/bin/bash
+sudo su
+yum update -y
+yum install httpd -y
+cd /var/www/html
+echo "Machine 2" > index.html
+service httpd start
+chkconfig httpd on 
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Load Balancer <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+Response timeout : for how much time LB should wait for the EC2 instance
+Interval : how frequently a LB should send a ping request to the EC2 instances to monitor its health
+Unhealthy threshold : number of times a LB should send a request to EC2 instance to declare it unhealthy
+Healthy threshold : number of times a LB should send a request to EC2 instance to declare it healthy
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> AutoScaling <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+this means to create and delete some or more EC2 instances as and when required.
+
+Step 1 : create a load balancer
+Step 2 : create launch configuration (RAM, OS, HDD information)
+Step 3 : from that LCG, create auto scaling group (minimum and maximum number of instances that have to be created)
+Step 4 : create topic in SNS(Simple Notification Service) and add subscription to it (email address)
+Step 5 : create 2 alarms (increase and decrease) in cloudwatch (creating a metric to measure the traffic, CPU utilization)
+	 search CPU and then EC2 > By Auto Scaling Group
+Step 6 : add 2 policies (increase and decrease) in auto scaling 
+	 auto scaling groups > automatic scaling > dynamic scaling policies > policy type >
+	 simple scaling > Take an action (add 1)	
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Status checks <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+Two types of status checks are done :
+
+1. System status check    (caused due to failure of hardware like RAM and Hard disk, automatically 
+			   instance status check will also fail. Stop and start the instance. In this 
+			   case, new hardware will be allocated)
+2. Instance status check  (caused due to failure of OS, reboot will rectify it)
+
+
+
+An instance can also be protected from being terminated.
+
+
+Scaling Up means to increase the capacity of hardware resources.
+
+Hard disk size can be increased without stopping the instance (by modifying the volume size)
+
+RAM and CPU size can't be changed without stopping the instance
+
+
+(Vertical Scaling)
+Scale UP >>> increasing the configuration of the current system
+
+
+(Horizontal Scaling)
+Scale OUT >>> instead of increasing the current configuration, attaching a new EC2 instance altogether
+
+
+Example: Autoscaling
+
+
+1 EC2 instance can have "n" number of volumes just like volumes of a hard disk
+
+EBS (Elastic Block Storage) are the volumes that are attached separately
+
+Only root volumes have snapshots as a string value
+
+
+Volumes can be detached and attached to a new EC2 instance.
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>> copying a volume from one region to another <<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+Step 1 : detach the volume from source region
+Step 2 : convert it into a snapshot (EBS volumes are not movable from one region to another but snapshots are) 
+Step 3 : copy the snapshot and move into the desired region
+Step 4 : create a volume from this snapshot
+Step 5 : attach this volume to the destination EC2 instance
+
+
+Customized AMI is used to save and replicate the configuration of a particular machine. A new machine 
+created from this AMI will already have all the softwares installed in it.
+
+Unlike Volumes (which need to be converted to snapshots first), Images can be directly copied from one region 
+to another.
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> S3 (Simple Secure Storage) <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+Its a service in which objects can be stored (not OS) just like Google Drive service.
+A bucket needs to be created first and then the object needs to be uploaded.
+Also provide public access to the object.
+AWS calculator can be used to estimate the prices.
+The dashboard of S3 is global (not region specific like EC2).
+When an object is deleted, it is not deleted actually but marked to delete. So, if we delete that marker,
+we can recover the deleted object.
+
+Versioning of objects can be done. It needs to be enabled first. Its advantages are :
+
+1. We can maintain the versions of the objects by making changes in the file and reuploading it
+2. We can recover the deleted objects (by deleting the markers)
+
+
+Static website can also be hosted. It needs to be enabled first.
+Two pages need to be there namely "index.html" and "error.html"
+By default, index page is displayed but for some reason if index page is not accessible, error page is 
+displayed.
+
+Cross Region Replication :
+
+It means to replicate the buckets across different regions. We need to enable CRR in the source bucket
+and then create a replication rule. Objects will be reflected in the destination as soon as they are
+uploaded in the source bucket(without copying manually). However, any change in the destination will
+not reflect in the source bucket.
+Versioning must be enabled at both the source as well as destination.
+
+Metadata : keys are predefined but values are user-defined
+
+Tags : keys as well as values are user-defined
+
+ACL (Access Control List) can be used to grant the access of a bucket to another person.
+
+Life cycle management can be managed on object level where in we can decide which object should be 
+moved to which storage class after how many days. This is avoid high billing.
+
+
+IAM (Identity Access Management) user is a child user of the root user who may or may not have full 
+access rights.
+
+Policies can be attached to users as well as groups and then users can be added to the groups.
+
+342489387911
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> logging from CLI <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+We need to have access key and secret key which can be found from IAM dashboard.
+Then we need to download "Amazon CLI tool for windows"
+
+>>> aws configure :  to connect from cmd
+
+Access Key ID:
+AKIAU7PPVKOD7ENJIE74
+Secret Access Key:
+BCgXwAYAWM3321NotHYGYavu2vfTtriqoshezye3
+
+
+aws <<service_name>> <<command_name>>
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> roles <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+whenever we want to establish the communication between different services, roles can be created.
+
+Steps to create a role :
+
+Step 1 : create an EC2 instance
+Step 2 : create an IM role (with S3FullAccess)
+
+
+Steps to attach the role :
+
+Step 1 : create a role
+Step 2 : attach policies to the role (S3)
+Step 3 : assign the role to EC2
+Step 4 : now this machine can access S3 service
+Step 5 : attach IAM policy as well to this role
+Step 6 : aws iam create-user --user-name roshaa (user will be created)
+
+
+
+commands to create groups and users through terminal :
+
+
+sudo su
+yum update -y
+aws configure
+aws iam create-group --group-name <<group_name>>
+aws iam create-user --user-name <<user_name>>
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> VPC <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+whenever an organization needs to use AWS, they need to book a partition in AWS data center which is 
+known as Virtual Private Cloud
+
+An IP series along with the subnet mask needs to be created. Subnet mask decides the size of the VPC.
+
+Eg. 10.0.0.0/16
+
+Maximum value for subnet mask allowed is 32
+
+Max : 32
+Allocated : 16
+EC2 machines allowed in the VPC : 2 raised to the power of 32-16 = 16 (65536)
+
+
+Eg. 10.0.0.0/18
+
+Max : 32
+Allocated : 18
+EC2 machines allowed in the VPC : 2 raised to the power of 32-18 = 14 (16384)
+
+
+Partitions inside the VPC are known as subnets
+
+
+VPC >>> subnets >>> EC2 machines
+
+By default, every subnet is private.
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> making a public subnet <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+create a VPC (10.0.0.0/16)
+
+create two subnets (10.0.1.0/24 & 10.0.2.0/24)
+
+enable public IP of the subnet you want to make public
+
+	Modify Auto Assign IP > Enable auto-assign public IPv4 address
+
+create an internet gateway and attach it to the VPC (gateway helps to provide internet connection to
+the subnet)
+
+Since, gateways can't be attached to the subnet directly, we need to create a route table
+
+connect route table to subnet you want to make public
+
+connect route table to your gateway (0.0.0.0/0) by navigating to Edit Routes.
+
+launch an EC2 instance in the webserver subnet	
+
+launch another EC2 instance in the Dbserver subnet and open only the MySQL port and use the range of the 
+Webserver subnet (10.0.1.0/24). Now only the EC2 instances present in the webserver subnet are able to access the EC2
+instances present in the DbServer subnet.
+
+
+Bastion server can be used to connect to private subnets (16th)
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Route 53 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+(19th)
+
+DNS in AWS is called Route 53. 53 is the DNS port number
+
+Its advantages:
+
+1. Converting domain names to IP addresses
+2. Handling regional failures
+
+
+In route 53, go to hosted zones. There we will see the purchased domains. Then create a record and link
+the current load balancer with that domain name with record of type "A"
+
+We can create weighted records as well in which people would get website in that percent ratio
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Cloudtrail <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+Under event history, every event can be tracked
+
+

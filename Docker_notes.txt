@@ -1,0 +1,215 @@
+
+there are 2 ways to create a docker image:
+
+1. from a dockerfile
+2. from a container
+
+service docker status >>> to check the status of docker
+
+service docker start >>> to start the docker
+
+service docker stop >>> to stop the docker
+
+docker search image_name >>> to search for an image
+
+docker images >>> to get the list of docker images in the local system
+
+docker pull image_name >>> to pull an image from docker hub
+
+
+docker run image_name:image_version >>> to run an image by making it a container
+
+docker run image_name:image_version echo "hello from docker" >>> to run an image
+
+docker run image_name:image_version ls >>> to get the contents of a docker container
+
+
+docker run -it image_name:image_version >>> to enter a docker container interactively
+
+As soon as we will exit a container, it will automatically get destroyed
+
+
+docker ps >>> to get the running docker containers
+
+docker ps -a >>> to get all the docker containers which are either running or previously run
+
+
+docker run --rm busybox:1.24 sleep 1 >>> to remove a docker container after sometime 
+
+docker run --name hello_from_docker busybox:1.24 >>> to give a custom name to a docker container 
+
+docker run -it --name <<container_name>> <<image_name>> >>> to give a custom name to a docker container 
+							    and run it simultaneously
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> starting a container <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+docker start container_name >>> to start a container
+
+docker attach container_name >>> to enter a container (container must be started)
+
+docker stop container_name >>> to stop a container
+
+docker rm container_name >>> to delete a container 
+
+docker diff container_name image_name >>> to compare the changes between the base image and the current container
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> creating an image from a container <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+docker commit container_name new_image_name >>> to create an image from a container
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> components of a Dockerfile <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+FROM >>> to specify the base image
+
+RUN >>> to execute the commands
+
+MAINTAINER >>> to specify the owner name
+
+COPY >>> to copy an image from local images
+
+ADD >>> to copy an image from internet
+
+EXPOSE >>> to open a particular port
+
+WORKDIR >>> to specify which directory to enter upon entry
+
+CMD >>> execute commands upon container creation
+
+ENTRYPOINT >>> similar to CMD but has higher priority than it
+
+ENV >>> to specify the environment variables
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> creating an image from Dockerfile <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+docker build -t image_name . >>> to build an image from the current Dockerfile
+
+
+A sample Dockerfile:
+
+FROM ubuntu
+WORKDIR /tmp
+RUN echo "image created using Dockerfile" > /tmp/testfile
+ENV owner roshaa
+COPY localfile /tmp
+ADD test.tar.gz /tmp
+
+tar -cvf test.tar test
+gzip test.tar
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> volumes <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+Volume can be created to share the data among the containers. 
+If a container is stopped, still the volume can be accessed. 
+Volume can be created just after creation of a container. 
+After an image is shared, volume of the current container will not become a volume in the new image rather
+it will act as a normal directory.
+On deletion of container, volumes doesn't get deleted.
+
+Sample volume creation from Dockerfile:
+
+FROM ubuntu
+VOLUME ["/<<volume_name>>"]
+
+
+Sample volume creation from command:
+
+docker run -it --name <<container_name_to_be_given>> -v /<<volume_name>> <<image_name>>
+
+
+sharing a volume to a container:
+
+docker run -it --name <<container_name_to_be_given>> --privileged=true --volumes-from <<container_name>> <<image_name>>
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> synchronizing host and container <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+docker run -it --name <<container_name_to_be_given>> -v /home/ec2-user:/<<container_name>> --privileged=true ubuntu
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> port expose <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+establishing a connection between host and container ports:
+
+docker run -td --name <<container_name_to_be_given>> -p <<host_port>>:<<container_port>> <<image_name>>
+
+docker run -td --name tech -p 80:80 ubuntu
+
+
+to check the connection:
+
+docker port <<container_name>> 
+
+
+
+docker exec -it tech /bin/bash
+
+apt-get update -y
+
+apt-get install apache2 -y
+
+cd /var/www/html
+
+echo "docker exposed" > index.html
+
+service apache2 start
+
+browse the EC2 instance on browser
+
+
+docker run -td --name myjenkins -p 8080:8080 jenkins/jenkins
+
+open 8080 port in the host
+
+browse again
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> pushing images to dockerhub <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+docker login
+
+docker tag myfirstimage akaroshaa/firstimage
+
+docker push akaroshaa/firstimage
+
+
+start another machine in another region
+
+docker pull akaroshaa/firstimage
+
+docker run -it --name roshaa akaroshaa/firstimage
+
+
+
+
+
+
+to stop all running containers:
+
+docker stop $(docker ps -a -q)
+
+
+to delete all stopped containers:
+
+docker rm $(docker ps -a -q)
+
+
+to delete all the images:
+
+docker rmi -f $(docker images -q)
+
+

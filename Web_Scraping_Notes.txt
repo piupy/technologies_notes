@@ -1,0 +1,84 @@
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> Web scraping (using beautifulsoup4) <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+pip install beautifulsoup4
+pip install lxml			# to install html-parser
+pip install requests
+
+from bs4 import BeautifulSoup
+import requests
+
+with open("sample.html") as html_file:
+    soup = BeautifulSoup(html_file, "lxml")
+
+# match = soup.div						# first "div"
+# match = soup.find("div", class_="helper")			# first "div" with the class name "helper"
+# match = soup.h2.a.text					# soup > h2 > a > text (innertext)
+# match = soup.find_all("div", class_="helper")			# all the "div" with the class name "helper"
+# match = soup.find_all("div", attrs= { "class" : "helper" })	# all the "div" with the class name "helper"
+# match = soup.find_all(["div","h2"])				# all the "div" and "h2"
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> scrapping a website <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+from bs4 import BeautifulSoup
+import requests
+
+source = requests.get("https://coreyms.com").text
+soup = BeautifulSoup(source,"lxml")
+print(soup.prettify())
+
+article = soup.find("article")
+print(article.prettify())
+
+headline = soup.find("article").header.h2.a.text
+print(headline)
+
+summary = soup.find("div",class_="entry-content").p.text
+print(summary)
+
+video_src = soup.find("iframe")["src"].split("/")[4].split("?")[0]
+url = f"https://youtube.com/watch?v={video_src}"
+print(url)
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>> some attributes <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+soup.find("div").next_sibling.previous_sibling
+
+soup.find("div").parent		# to get the parent tag
+
+soup.find("div").parents	# to get the parents tags
+
+soup.select("#article1")	# element with id="article1"
+
+soup.select(".header")		# element with class="header"
+
+soup.select("#article1 p")	# "p" element inside an element with id="article1"
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> getting live cricket score <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+def score():
+    import requests
+    from bs4 import BeautifulSoup
+    source = requests.get("https://www.cricbuzz.com/live-cricket-scores/32258/ind-vs-eng-3rd-test-england-tour-of-india-2021").text
+    soup = BeautifulSoup(source,"lxml")
+    divv = soup.find("div",class_="cb-min-bat-rw")
+    team = divv.text.split()[0]
+    score = divv.text.split()[1]
+    overs = divv.text.split()[2]
+    print(team)
+    runs = score.split("/")[0]
+    wickets = score.split("/")[1]
+    print(f"Runs = {runs}")
+    print(f"Wickets = {wickets}")
+    
+
+score()
+
+
+

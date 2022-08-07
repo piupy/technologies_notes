@@ -1,0 +1,708 @@
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Flask notes <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+pip install flask
+
+
+from flask import Flask
+app = Flask(__name__)
+
+@app.route("/")			# home page end point (this name "@app.route" should match with the app name)
+def hello():
+    return "Hello World"
+
+
+>>> flask run 			# to run flask server
+
+But if we will make any change in the code, we will have to manually restart the server to see the
+changes. Instead, we would want the server to get started automatically. So, we would have to turn on 
+the debug mode:
+
+>>> set FLASK_DEBUG=1		# to turn on the debug mode
+
+
+However, the effect of FLASK_DEBUG will be there until the application is running and hence we would
+have to manually turn it on everytime we open the IDE and then run "flask run" command.
+So, instead of that, we directly run it in debug mode using python code and directly run the file:
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
+
+Now, no need to turn on the FLASK_DEBUG mode explicitly.
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>> additional settings <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>> set FLASK_APP=app.py	# to set the flask app (optional in nowadays versions)
+
+>>> set FLASK_ENV=development	# to set development server 
+
+>>> echo %FLASK_APP%		# to get the value of an environment variable
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+setting up multiple routes for a single end-point:
+
+@app.route("/")
+@app.route("/home")
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> using templates <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+create a folder with the name "templates" where the app.py file exists. The name of the folder can't 
+be different than this name("templates"). Create an HTML file "index.html" inside this folder.
+
+
+from flask import Flask, render_template
+
+def index():
+    return render_template("index.html")
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Sending data to a template <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+data_posts = [
+    {
+        "author" : "Rohit Sharma",
+        "content" : "First post",
+        "date" : "27th May 2021"
+    },
+    {
+        "author": "Scott Adkins",
+        "content": "Second post",
+        "date": "28th May 2021"
+    }
+]
+
+@app.route("/")
+def index():
+    return render_template("index.html",template_posts=data_posts)
+
+
+In template file:
+
+
+{% for post in template_posts %}
+
+<p>By {{ post.author }} on {{ post.date }}</p>
+<p>{{ post.content }}</p>
+
+{% endfor %}
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> using if-else <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+{% if condition  %}
+
+{% else %}
+
+{% endif %}
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> template inheritance <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+contents of base file:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+{% block body %}
+
+{% endblock %}
+
+</body>
+</html>
+
+
+
+Now, we just need to fill the contents of "block body" in the child file and rest of the code will be 
+inherited from the base.html file by the child file.
+
+In child file:
+
+{% extends "base.html" %}
+
+{% block body %}
+
+<h1>This is child page</h1>
+
+{% endblock body %} or simply {% endblock %} 
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> adding static files <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+create a folder with the name "static" and add some static files in it. The name of the folder can't 
+be different than this name("static"). Add a static file "main.css" inside this folder.
+
+
+from flask import Flask, url_for
+
+in template:
+
+<link href="{{ url_for('static', filename='main.css') }}" />
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> creating forms and user input <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+pip install flask-wtf
+
+create a file "forms.py" in which form details will be mentioned
+
+pip install email_validator
+
+Code:
+
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms.validators import DataRequired, Length, Email, EqualTo
+
+class RegistrationForm(FlaskForm):
+    username = StringField('Username',
+                           validators=[DataRequired(), Length(min=2, max=20)])
+    email = StringField('Email',
+                        validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm Password',
+                                     validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Sign Up')
+
+
+class LoginForm(FlaskForm):
+    email = StringField('Email',
+                        validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    remember = BooleanField('Remember Me')
+    submit = SubmitField('Login')
+
+
+Instead of checking for validations from JS on the HTML controls, we would send these controls which
+already have built-in validations with them.
+We will send an instance of this form in the template. It will render as HTML components
+
+submit = SubmitField('Sign Up')  # "Sign Up" will be used as a label in the form
+
+
+
+Add a secret token key in the application:
+
+>>> import secrets 
+>>> secrets.token_hex(16)	# '89eb1acbbfc1cc11e43f947ef27c22c0'
+
+
+app.config['SECRET_KEY'] = '89eb1acbbfc1cc11e43f947ef27c22c0'
+
+
+create two templates login.html and register.html
+
+
+Add the following code in base.html file to see the flash messages:
+
+ 	{% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+
+form.validate_on_submit() : this property returns True only when all the validations are True as per
+			    the validators defined in the forms.py file. It doesn't check anything else
+
+
+In app.py:
+
+from flask import Flask, render_template, url_for, flash, redirect
+from forms import RegistrationForm, LoginForm
+
+
+@app.route("/register", methods=['GET', 'POST'])
+def register():
+    form = RegistrationForm()							# creating a form object
+    if form.validate_on_submit():						# if form doesn't have any errors
+        flash(f'Account created for {form.username.data}!', 'success')		# fetching the form values
+        return redirect(url_for('home'))					# "home" is the name of method used in the code 
+    return render_template('register.html', title='Register', form=form)	# and not name of the route
+
+
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        if form.email.data == 'admin@blog.com' and form.password.data == 'password':
+            flash('You have been logged in!', 'success')
+            return redirect(url_for('home'))
+        else:
+            flash('Login Unsuccessful. Please check username and password', 'danger')
+    return render_template('login.html', title='Login', form=form)
+
+
+
+CSRF token :  {{ form.hidden_tag() }}
+
+Register page :
+
+
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section">
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Join Today</legend>
+                <div class="form-group">
+                    {{ form.username.label(class="form-control-label") }}
+
+                    {% if form.username.errors %}
+                        {{ form.username(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.username.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.username(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.email.label(class="form-control-label") }}
+                    {% if form.email.errors %}
+                        {{ form.email(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.email.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.email(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.password.label(class="form-control-label") }}
+                    {% if form.password.errors %}
+                        {{ form.password(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.password.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.password(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.confirm_password.label(class="form-control-label") }}
+                    {% if form.confirm_password.errors %}
+                        {{ form.confirm_password(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.confirm_password.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.confirm_password(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+        </form>
+    </div>
+    <div class="border-top pt-3">
+        <small class="text-muted">
+            Already Have An Account? <a class="ml-2" href="{{ url_for('login') }}">Sign In</a>
+        </small>
+    </div>
+{% endblock content %}
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> connecting with database <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+>>> pip install flask-sqlalchemy
+
+In app.py file:
+
+
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+db = SQLAlchemy(app)
+
+
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(20), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
+    password = db.Column(db.String(60), nullable=False)
+    posts = db.relationship('Post', backref='author', lazy=True)
+
+    def __repr__(self):
+        return f"User('{self.username}', '{self.email}', '{self.image_file}')"
+
+
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    content = db.Column(db.Text, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    def __repr__(self):
+        return f"Post('{self.title}', '{self.date_posted}')"
+
+
+
+To create a relationship with the Post class:
+
+   --->	posts = db.relationship('Post', backref='author', lazy=True)
+  |
+  |
+  |	   To create a foreign key:
+  |
+  |   -->  user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+  |  |
+  |  |
+  |  |
+  |  ----- User is referring to the database table, thats why the name "user" is used.
+  |
+   ------- Post is referring to the Flask class, thats why the name "Post" is used.
+
+
+"backref" means by using the "author" attribute of Post class, the instance will get the related User.
+
+similarly, by using the "posts" attribute of User class, the instance will get all the related Posts.
+
+To create database tables:
+
+
+>>> from app import db (whenever we import something from a file, that file gets executed)
+
+>>> db.create_all()
+
+>>> from app import User,Post
+
+>>> user1 = User(username="Rohit",email="rohit@gmail.com",password="pass1")
+
+>>> user2 = User(username="Amit",email="amit@gmail.com",password="pass2")
+
+>>> db.session.add(user1)	# to create a user
+
+>>> db.session.add(user2)	
+
+>>> db.session.commit()		# to save the changes
+
+>>> User.query.all()		# to get all the users
+
+>>> User.query.first()		# to get the first user
+
+>>> User.query.filter_by(username="Rohit").first()	# to apply a filter
+
+>>> User.query.get(1)		# to filter based on primary key
+
+>>> post1 = Post(title="Blog 1", content="First Post content", user_id=1)
+
+>>> post2 = Post(title="Blog 2", content="Second Post content", user_id=1)
+
+>>> db.session.add(post1)
+
+>>> db.session.add(post2)
+
+>>> db.session.commit()
+
+>>> user1.posts		# to get all the posts
+
+>>> post1.author	# to get the user
+
+>>> db.drop_all()	# to drop all the tables
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> converting a project into a package <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+create a models.py file and move the models(Python classes) into it
+
+from datetime import datetime
+from app import db
+
+
+create a folder with the name same as that of the main file and create an "__init__.py" file inside that
+folder. Now, it becomes a package. Move all the files except the main file in this package. (Main file
+acts as manage.py file of Django)
+
+
+paste following in __init__.py file:
+
+
+from .forms import RegistrationForm, LoginForm
+from flask import Flask, render_template, url_for, flash, redirect
+from flask_sqlalchemy import SQLAlchemy
+
+app=Flask(__name__)
+
+app.config['SECRET_KEY'] = 'fc009ffb020fa342a540fb5bf606fed5'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+db = SQLAlchemy(app)
+
+
+
+This file has the contents that need to available as soon as the application starts
+
+change the name of "app.py" file to "run.py"
+
+Whenever we import something from a package, by default it searches in its __init__.py file. So, no need
+to use the file name explicitly unlike a normal folder( from FlaskBlog.__init__ import app).
+
+
+Add routes into __init__ file else we will not be able to navigate to the routes.
+
+from . import routes
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>> get database table names in SQLAlchemy <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+>>> from sqlalchemy import inspect
+
+>>> inspect(db.get_engine()).get_table_names()
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> implementing sign up <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>> pip install flask-bcrypt
+
+>>> from flask_bcrypt import Bcrypt
+
+>>> bcrypt = Bcrypt()
+
+>>> hashed_password = bcrypt.generate_password_hash("test").decode("utf-8") 	# to generate a 
+										# hashed_password string
+
+everytime a new hashed_password is generated whenever this function is run
+
+>>> bcrypt.check_password_hash(hashed_password,"test")				# to match hashed_password
+										# with a normal string
+
+add this in __init__.py : 
+
+from flask_bcrypt import Bcrypt
+
+bcrypt = Bcrypt(app)
+
+add following code to add a user:
+
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode("utf-8")
+        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+        db.session.add(user)
+        db.session.commit()
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> checking duplicacy of username and email <<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+In forms.py :
+
+from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
+from Flaskblog.models import User
+
+>>>>>>>>>>> creating custom validators :
+
+We can create methods in the format "validate_<<field>>" and since these methods will be class
+methods, we can directly use fieldnames inside them without using any form object.
+
+
+https://stackoverflow.com/questions/54582898/flaskform-validation-code-checking-if-a-user-already-exists-or-not
+
+
+format:
+
+def validate_<<field>>(self, <<field>>):
+    if True:
+        raise ValidationError("Validation Message")
+
+
+
+In User class, add these functions :
+
+    def validate_username(self, username):
+        user = User.query.filter_by(username=username.data).first()
+        if user:
+            raise ValidationError('That username is taken. Please choose a different one.')
+
+    def validate_email(self, email):
+        user = User.query.filter_by(email=email.data).first()
+        if user:
+            raise ValidationError('That email is taken. Please choose a different one.')
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> implementing login <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+>>> pip install flask-login
+
+In init.py :
+
+from flask_login import LoginManager
+
+login_manager = LoginManager(app)
+
+
+In models.py : 
+
+from Flaskblog import db, login_manager
+from flask_login import UserMixin
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+class User(db.Model, UserMixin):
+
+
+UserMixin will provide methods like is_authenticated for checking valid logins
+
+load_user method will provide the user
+
+
+user = User.query.filter_by(email=form.email.data).first()
+if user and bcrypt.check_password_hash(user.password, form.password.data):
+    login_user(user, remember=form.remember.data)
+
+
+from flask_login import login_user
+
+
+To check if user is already logged in :
+
+    if current_user.is_authenticated:
+        return redirect(url_for("index"))
+
+
+To logout:
+
+from flask_login import login_user, current_user, logout_user
+
+
+
+To check login required of an route, use @login_required with that route.
+
+
+
+to set the route when login_required fails :
+
+In __init__.py : 
+
+login_manager.login_view = "login"
+login_manager.login_message_category = "info"
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> uploading profile image <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+from flask_wtf.file import FileField, FileAllowed
+
+
+Add enctype="multipart/form-data" in the form so that "file" type validations can work properly
+
+
+
+Add following FileField in UpdateAccountForm :
+
+picture = FileField("Update Profile Picture", validators=[FileAllowed(["jpg", "png"])])
+
+
+
+pip install Pillow
+
+
+Code to save the file:
+
+def save_picture(form_picture):
+    random_hex = secrets.token_hex(8)
+    file_name, file_extension = os.path.splitext(form_picture.filename)
+    picture_hex_name = random_hex + file_extension
+    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_hex_name)
+
+    # resizing the image before saving
+    image = Image.open(form_picture)
+    image.thumbnail((125, 125))
+    image.save(picture_path)
+
+    return picture_hex_name
+
+
+In account route:
+
+if form.picture.data:
+    current_user.image_file = save_picture(form.picture.data)
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> creating a new post <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+In forms.py :
+
+class PostForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    content = TextAreaField('Content', validators=[DataRequired()])
+    submit = SubmitField('Post')
+
+
+In routes.py :
+
+@app.route("/post/new", methods=['GET', 'POST'])
+@login_required
+def new_post():
+    form = PostForm()
+    if form.validate_on_submit():
+        post = Post(title=form.title.data, content=form.content.data, author=current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash('Your post has been created!', 'success')
+        return redirect(url_for('index'))
+    return render_template('create_post.html', form=form)
+
+
+@app.route("/post/<int:post_id>")
+def post(post_id):
+    post = Post.query.get_or_404(post_id)
+    return render_template('post.html', title=post.title, post=post)
+
+
+@app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
+@login_required
+def update_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        abort(403)
+    form = PostForm()
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.content = form.content.data
+        db.session.commit()
+        flash('Your post has been updated!', 'success')
+        return redirect(url_for('post', post_id=post.id))
+    elif request.method == 'GET':
+        form.title.data = post.title
+        form.content.data = post.content
+    return render_template('create_post.html', title='Update Post',
+                           form=form, legend='Update Post')
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> End of Flask <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+

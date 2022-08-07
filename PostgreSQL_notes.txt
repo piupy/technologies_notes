@@ -1,0 +1,129 @@
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> PostgreSQL notes <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+\l : list of all databases
+
+\c <<db_name>> : to connect to a particular database
+
+\dt : to get all the database table names
+
+\d <<table_name>> : to describe a table
+
+
+
+
+to get sample records:	https://mockaroo.com
+
+
+create table tbl (
+	id serial primary key,
+	first_name VARCHAR(50),
+	last_name VARCHAR(50),
+	email VARCHAR(50),
+	gender VARCHAR(50),
+	address VARCHAR(50)
+);
+insert into tbl (first_name, last_name, email, gender, address) values ('Doll', 'Ladewig', 'dladewig0@fotki.com', 'Polygender', 'China');
+insert into tbl (first_name, last_name, email, gender, address) values ('Janessa', 'Burris', 'jburris1@usa.gov', 'Female', 'Brazil');
+insert into tbl (first_name, last_name, email, gender, address) values ('Scotti', 'Laughren', 'slaughren2@sbwire.com', 'Polygender', 'Indonesia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Dagmar', 'Sephton', 'dsephton3@theatlantic.com', 'Polygender', 'Democratic Republic of the Congo');
+insert into tbl (first_name, last_name, email, gender, address) values ('Sax', 'Leneham', 'sleneham4@diigo.com', 'Female', 'Tunisia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Humphrey', 'Loreit', 'hloreit5@java.com', 'Agender', 'Portugal');
+insert into tbl (first_name, last_name, email, gender, address) values ('Gaultiero', 'Scantlebury', 'gscantlebury6@google.com', 'Male', 'Croatia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Abbe', 'Rolstone', 'arolstone7@infoseek.co.jp', 'Genderqueer', 'Ecuador');
+insert into tbl (first_name, last_name, email, gender, address) values ('Chilton', 'Wozencraft', 'cwozencraft8@jugem.jp', 'Polygender', 'China');
+insert into tbl (first_name, last_name, email, gender, address) values ('Gherardo', 'Van Niekerk', 'gvanniekerk9@auda.org.au', 'Bigender', 'Brazil');
+insert into tbl (first_name, last_name, email, gender, address) values ('Tuck', 'Hillan', 'thillana@whitehouse.gov', 'Male', 'Brazil');
+insert into tbl (first_name, last_name, email, gender, address) values ('Christin', 'Danis', 'cdanisb@simplemachines.org', 'Non-binary', 'China');
+insert into tbl (first_name, last_name, email, gender, address) values ('Cello', 'Hillborne', 'chillbornec@goodreads.com', 'Bigender', 'Nigeria');
+insert into tbl (first_name, last_name, email, gender, address) values ('Wolf', 'Yakebowitch', 'wyakebowitchd@cnet.com', 'Bigender', 'Poland');
+insert into tbl (first_name, last_name, email, gender, address) values ('Riva', 'Hugill', 'rhugille@nasa.gov', 'Polygender', 'China');
+insert into tbl (first_name, last_name, email, gender, address) values ('Ker', 'Maybery', 'kmayberyf@hexun.com', 'Genderfluid', 'Japan');
+insert into tbl (first_name, last_name, email, gender, address) values ('Sherm', 'Glaves', 'sglavesg@delicious.com', 'Male', 'China');
+insert into tbl (first_name, last_name, email, gender, address) values ('Wenonah', 'Lumsdall', 'wlumsdallh@last.fm', 'Genderfluid', 'France');
+insert into tbl (first_name, last_name, email, gender, address) values ('Sancho', 'Stanger', 'sstangeri@discuz.net', 'Polygender', 'Poland');
+insert into tbl (first_name, last_name, email, gender, address) values ('Padget', 'Blackaby', 'pblackabyj@nsw.gov.au', 'Female', 'Sweden');
+insert into tbl (first_name, last_name, email, gender, address) values ('Shauna', 'Kiss', 'skissk@huffingtonpost.com', 'Agender', 'Poland');
+insert into tbl (first_name, last_name, email, gender, address) values ('Correy', 'Grichukhin', 'cgrichukhinl@twitpic.com', 'Female', 'Russia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Gilberte', 'Raddin', 'graddinm@a8.net', 'Bigender', 'China');
+insert into tbl (first_name, last_name, email, gender, address) values ('Ivy', 'Bruckenthal', 'ibruckenthaln@marketwatch.com', 'Bigender', 'Philippines');
+insert into tbl (first_name, last_name, email, gender, address) values ('Farrah', 'Spickett', 'fspicketto@barnesandnoble.com', 'Female', 'South Africa');
+insert into tbl (first_name, last_name, email, gender, address) values ('Xena', 'Chilley', 'xchilleyp@usatoday.com', 'Non-binary', 'Mexico');
+insert into tbl (first_name, last_name, email, gender, address) values ('Maisey', 'Lethem', 'mlethemq@canalblog.com', 'Bigender', 'China');
+insert into tbl (first_name, last_name, email, gender, address) values ('Smith', 'Petroff', 'spetroffr@1688.com', 'Genderfluid', 'Slovenia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Sergei', 'Tolliday', 'stollidays@marketwatch.com', 'Polygender', 'China');
+insert into tbl (first_name, last_name, email, gender, address) values ('Jayme', 'Radmer', 'jradmert@digg.com', 'Bigender', 'Colombia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Nehemiah', 'Bareford', 'nbarefordu@gravatar.com', 'Female', 'Sweden');
+insert into tbl (first_name, last_name, email, gender, address) values ('Caro', 'Borrott', 'cborrottv@wikispaces.com', 'Bigender', 'Sweden');
+insert into tbl (first_name, last_name, email, gender, address) values ('Nickola', 'Althorpe', 'nalthorpew@prnewswire.com', 'Male', 'South Africa');
+insert into tbl (first_name, last_name, email, gender, address) values ('Dee', 'McPhee', 'dmcpheex@buzzfeed.com', 'Female', 'Russia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Bertie', 'Sigward', 'bsigwardy@wordpress.org', 'Agender', 'Argentina');
+insert into tbl (first_name, last_name, email, gender, address) values ('Gearard', 'Brightie', 'gbrightiez@typepad.com', 'Non-binary', 'Croatia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Bambie', 'Kenson', 'bkenson10@jigsy.com', 'Male', 'Nigeria');
+insert into tbl (first_name, last_name, email, gender, address) values ('Agnola', 'Waylett', 'awaylett11@oracle.com', 'Genderqueer', 'Indonesia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Drusilla', 'Griffitt', 'dgriffitt12@google.co.uk', 'Male', 'Indonesia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Margie', 'Daveren', 'mdaveren13@usatoday.com', 'Agender', 'Peru');
+insert into tbl (first_name, last_name, email, gender, address) values ('Eada', 'Heyball', 'eheyball14@360.cn', 'Genderqueer', 'Pakistan');
+insert into tbl (first_name, last_name, email, gender, address) values ('Chrysa', 'Hessentaler', 'chessentaler15@un.org', 'Genderfluid', 'China');
+insert into tbl (first_name, last_name, email, gender, address) values ('Aldin', 'Rugiero', 'arugiero16@reuters.com', 'Polygender', 'Indonesia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Monte', 'Canadas', 'mcanadas17@t-online.de', 'Genderfluid', 'Palestinian Territory');
+insert into tbl (first_name, last_name, email, gender, address) values ('Sheri', 'Aylott', 'saylott18@bbc.co.uk', 'Polygender', 'Nigeria');
+insert into tbl (first_name, last_name, email, gender, address) values ('Ethelred', 'Sebert', 'esebert19@myspace.com', 'Non-binary', 'Eritrea');
+insert into tbl (first_name, last_name, email, gender, address) values ('Eric', 'Tuttiett', 'etuttiett1a@princeton.edu', 'Female', 'Japan');
+insert into tbl (first_name, last_name, email, gender, address) values ('Orville', 'Nansom', 'onansom1b@umich.edu', 'Polygender', 'Indonesia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Korney', 'Beadham', 'kbeadham1c@wordpress.com', 'Non-binary', 'Thailand');
+insert into tbl (first_name, last_name, email, gender, address) values ('Beatrisa', 'Werndley', 'bwerndley1d@sina.com.cn', 'Bigender', 'Argentina');
+insert into tbl (first_name, last_name, email, gender, address) values ('Kliment', 'Buttfield', 'kbuttfield1e@diigo.com', 'Female', 'United States');
+insert into tbl (first_name, last_name, email, gender, address) values ('Isaac', 'Buche', 'ibuche1f@bigcartel.com', 'Genderqueer', 'Peru');
+insert into tbl (first_name, last_name, email, gender, address) values ('Irv', 'Daens', 'idaens1g@sphinn.com', 'Polygender', 'China');
+insert into tbl (first_name, last_name, email, gender, address) values ('Gwenneth', 'Radoux', 'gradoux1h@elpais.com', 'Polygender', 'Philippines');
+insert into tbl (first_name, last_name, email, gender, address) values ('Georgy', 'Neachell', 'gneachell1i@cornell.edu', 'Genderqueer', 'Czech Republic');
+insert into tbl (first_name, last_name, email, gender, address) values ('Wendell', 'Faiers', 'wfaiers1j@ft.com', 'Genderqueer', 'South Africa');
+insert into tbl (first_name, last_name, email, gender, address) values ('Natale', 'Itscowics', 'nitscowics1k@discovery.com', 'Non-binary', 'China');
+insert into tbl (first_name, last_name, email, gender, address) values ('Delmar', 'Elloit', 'delloit1l@meetup.com', 'Female', 'Russia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Marybelle', 'Cradick', 'mcradick1m@virginia.edu', 'Female', 'Bosnia and Herzegovina');
+insert into tbl (first_name, last_name, email, gender, address) values ('Ernesto', 'Geddes', 'egeddes1n@springer.com', 'Genderqueer', 'Indonesia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Chilton', 'Keen', 'ckeen1o@wsj.com', 'Female', 'Russia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Fidelia', 'Mabbott', 'fmabbott1p@imgur.com', 'Genderfluid', 'China');
+insert into tbl (first_name, last_name, email, gender, address) values ('Felicdad', 'Buntin', 'fbuntin1q@delicious.com', 'Bigender', 'Indonesia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Hobie', 'Vanichkov', 'hvanichkov1r@va.gov', 'Polygender', 'China');
+insert into tbl (first_name, last_name, email, gender, address) values ('Stephi', 'Lillford', 'slillford1s@lulu.com', 'Non-binary', 'Ukraine');
+insert into tbl (first_name, last_name, email, gender, address) values ('Ingrim', 'McGruar', 'imcgruar1t@gnu.org', 'Male', 'Indonesia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Monty', 'Smiz', 'msmiz1u@about.com', 'Non-binary', 'China');
+insert into tbl (first_name, last_name, email, gender, address) values ('Patty', 'Plaskitt', 'pplaskitt1v@networkadvertising.org', 'Male', 'Ukraine');
+insert into tbl (first_name, last_name, email, gender, address) values ('Estel', 'Jesse', 'ejesse1w@gov.uk', 'Non-binary', 'Russia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Ara', 'Gullivent', 'agullivent1x@shinystat.com', 'Non-binary', 'Brazil');
+insert into tbl (first_name, last_name, email, gender, address) values ('Flint', 'Jendrach', 'fjendrach1y@oakley.com', 'Genderfluid', 'Norway');
+insert into tbl (first_name, last_name, email, gender, address) values ('Oswald', 'Fenck', 'ofenck1z@instagram.com', 'Male', 'Ethiopia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Pietro', 'Pumfrey', 'ppumfrey20@newyorker.com', 'Male', 'Sweden');
+insert into tbl (first_name, last_name, email, gender, address) values ('Brinna', 'Burbridge', 'bburbridge21@macromedia.com', 'Genderqueer', 'China');
+insert into tbl (first_name, last_name, email, gender, address) values ('Faye', 'Hudson', 'fhudson22@oaic.gov.au', 'Agender', 'China');
+insert into tbl (first_name, last_name, email, gender, address) values ('Lydon', 'Deadman', 'ldeadman23@behance.net', 'Agender', 'Malaysia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Pace', 'Cleatherow', 'pcleatherow24@newyorker.com', 'Agender', 'Indonesia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Quentin', 'Stedson', 'qstedson25@apache.org', 'Non-binary', 'Brazil');
+insert into tbl (first_name, last_name, email, gender, address) values ('Hazel', 'Campey', 'hcampey26@answers.com', 'Bigender', 'Indonesia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Nicki', 'Blaksland', 'nblaksland27@t-online.de', 'Agender', 'United States');
+insert into tbl (first_name, last_name, email, gender, address) values ('Casandra', 'Scase', 'cscase28@hatena.ne.jp', 'Genderqueer', 'France');
+insert into tbl (first_name, last_name, email, gender, address) values ('Crin', 'Fullilove', 'cfullilove29@shareasale.com', 'Female', 'Laos');
+insert into tbl (first_name, last_name, email, gender, address) values ('Bird', 'De Courtney', 'bdecourtney2a@mozilla.org', 'Male', 'Russia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Nobie', 'Ramas', 'nramas2b@microsoft.com', 'Agender', 'Indonesia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Cloe', 'Scoular', 'cscoular2c@themeforest.net', 'Genderqueer', 'Indonesia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Atalanta', 'Cracker', 'acracker2d@opensource.org', 'Female', 'Colombia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Aindrea', 'Shipsey', 'ashipsey2e@biglobe.ne.jp', 'Female', 'Indonesia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Timmie', 'Stinton', 'tstinton2f@wikispaces.com', 'Genderfluid', 'Chile');
+insert into tbl (first_name, last_name, email, gender, address) values ('Donaugh', 'Adie', 'dadie2g@dion.ne.jp', 'Female', 'Armenia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Mathias', 'Foldes', 'mfoldes2h@disqus.com', 'Genderfluid', 'Portugal');
+insert into tbl (first_name, last_name, email, gender, address) values ('Timothee', 'Moland', 'tmoland2i@webnode.com', 'Agender', 'Moldova');
+insert into tbl (first_name, last_name, email, gender, address) values ('Edi', 'Rodgers', 'erodgers2j@bbc.co.uk', 'Female', 'Argentina');
+insert into tbl (first_name, last_name, email, gender, address) values ('Julieta', 'Le Floch', 'jlefloch2k@is.gd', 'Agender', 'China');
+insert into tbl (first_name, last_name, email, gender, address) values ('Haroun', 'Robelin', 'hrobelin2l@reverbnation.com', 'Genderqueer', 'Botswana');
+insert into tbl (first_name, last_name, email, gender, address) values ('Jamaal', 'Aherne', 'jaherne2m@cnn.com', 'Non-binary', 'Indonesia');
+insert into tbl (first_name, last_name, email, gender, address) values ('Neale', 'Futcher', 'nfutcher2n@people.com.cn', 'Bigender', 'China');
+insert into tbl (first_name, last_name, email, gender, address) values ('Tamas', 'Spilling', 'tspilling2o@tiny.cc', 'Polygender', 'Guatemala');
+insert into tbl (first_name, last_name, email, gender, address) values ('Franny', 'Izen', 'fizen2p@arstechnica.com', 'Non-binary', 'Portugal');
+insert into tbl (first_name, last_name, email, gender, address) values ('Ava', 'Lowne', 'alowne2q@dropbox.com', 'Genderqueer', 'Sweden');
+insert into tbl (first_name, last_name, email, gender, address) values ('Allene', 'Grasser', 'agrasser2r@reverbnation.com', 'Genderfluid', 'China');
+
+

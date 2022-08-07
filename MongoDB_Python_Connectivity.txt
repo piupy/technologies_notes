@@ -1,0 +1,172 @@
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Python connectivity with MongoDB <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+pip install pymongo
+
+import pymongo
+
+client = pymongo.MongoClient('mongodb://localhost:27017')
+
+client.list_database_names()	         # get databases names
+
+database = client['dbase']		 # creating/fetching a particular database
+
+database.list_collection_names()	 # fetching the list of collections in a database
+
+collection = database['test']		 # creating/fetching a particular collection
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Insertion <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+collection.insert_one({		 	 # inserting a record
+    "name" : "Amit",
+    "salary" : 29000
+})
+
+
+A column with the name "_id" is maintained by mongodb which is unique. However, we can explicitly pass a key
+with the name "_id" but the values must be unique.
+
+
+collection.insert_many([
+{
+    "_id" : 33,
+    "name" : "Jason",
+    "salary" : 26000
+},
+{
+    "_id" : 34,
+    "name" : "Scott",
+    "salary" : 27000
+},
+{
+    "_id" : 35,
+    "name" : "Amit",
+    "salary" : 28000
+},
+{
+    "_id" : 36,
+    "name" : "Sumit",
+    "salary" : 29000
+},
+{
+    "_id" : 37,
+    "name" : "Punit",
+    "salary" : 30000
+}])
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Retrieval <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+collection.find_one()			 # retrieving first document
+
+for value in collection.find():		 # retrieving all documents
+    print(value)
+
+collection.find({},{"salary"})		 # retrieving just the salary and _id column of all the documents 
+					 #  (_id column will be retrieved for better retrieval results)
+
+for value in collection.find({ "_id" : 34 },{"salary"}):	# retrieving just the salary and _id column
+    print(value)						# of the document with _id = 34
+					        		# (_id column will be retrieved for better 
+								# retrieval results)
+
+			>>>>>>>>>>>>>>>>> Applying filters <<<<<<<<<<<<<<<<<<<<
+
+
+$gt : greater than
+$gte : greater than or equal to
+$lt : less than
+$lte : less than or equal to
+
+for value in collection.find({ "_id" : { "$gt" : 34 } },{"salary"}):	# retrieving just the salary and _id
+    print(value)							# column of the document with _id = 34
+					        			# (_id column will be retrieved for better 
+									# retrieval results)
+
+
+for value in collection.find().limit(3):				# retrieving top 3 records only
+    print(value)							
+					        			
+									
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Updation <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+collection.update_one({							# updating single document
+                            "_id" : 35
+                      },
+                      {
+                            "$set" : {
+                                        "name" : "Updated Name"
+                                     }
+                      })
+
+
+collection.update_many({						# updating multiple documents
+                            "_id" : { "$gt" : 34 }
+                       },
+                       {
+                            "$set" : {
+                                        "name" : "Updated Many Names"
+                                     }
+                       })
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Deletion <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+collection.delete_one({ "_id" : 37 })			# to delete a document
+
+collection.delete_many({ "_id" : { "$gt" : 34 } })	# to delete documents satisfying a condition
+
+collection.delete_many({})				# to delete all the documents
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Dropping a collection <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+collection.drop()				
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> MongoDB Atlas <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+pip install pymongo[srv]             
+
+# and then restart the IDE. Also, prevent using any special character in password
+
+import pymongo
+
+client = pymongo.MongoClient('mongodb+srv://admin:Mongo123@cluster0.u9dfi.mongodb.net/db_cloud?retryWrites=true&w=majority')
+
+database = client['db_cloud']			 # creating/fetching a particular database
+
+collection = database['coll_cloud']		 # creating/fetching a particular collection
+
+collection.insert_many([{
+			"_id" : 1,
+			"name" : "CloudRohit"
+},
+{
+			"_id" : 2,
+			"name" : "CloudAmit"
+},
+{
+			"_id" : 3,
+			"name" : "CloudSumit"
+},
+{
+			"_id" : 4,
+			"name" : "CloudPunit"
+}])
+
+for document in collection.find():
+    print(document)
+
+
+

@@ -1,0 +1,325 @@
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Chef notes <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+create a folder named cookbooks and enter it
+
+chef generate cookbook <<cookbook_name>> : to generate a cookbook
+
+chef generate recipe <<recipe_name>> : to generate a recipe
+
+to edit a recipe, we need to get outside it
+
+
+code to create a recipe:
+
+
+file "/myfile" do
+content "welcome to chef"
+action :create
+end
+
+
+chef exec ruby -c recipes/test-recipe.rb  :  to check for syntax
+
+chef-client -zr "recipe[test-cookbook::test-recipe]"  :  to run a recipe
+
+
+package "tree" do
+action :install
+end
+
+
+
+code to install apache server:
+
+
+package 'httpd' do
+action :install
+end
+
+file '/var/www/html/index.html' do
+content 'Welcome to apache server'
+action :create
+end
+
+service 'httpd' do
+action [:enable, :start]
+end
+
+
+attributes priority :
+
+ohai > recipe > attribute file
+
+
+types of attributes (as per priority):
+
+1. automatic
+2. force_override
+3. override
+4. normal
+5. force_default
+6. default
+
+
+
+ohai ipaddress  : to check ohai ip address 
+
+ohai cpu/0/mhz  : to check CPU
+
+
+
+code to get the attributes:
+
+file '/basicinfo' do
+ content "This is to get Attributes
+ HOSTNAME: #{node['hostname']}
+ IPADDRESS: #{node['ipaddress']}
+ CPU: #{node['cpu']['0']['mhz']}
+ MEMORY: #{node['memory']['total']}"
+ owner 'root'
+ group 'root'
+action :create
+end
+
+
+executing linux command from chef:
+
+execute "this is message" do
+command << -EOH
+mkdir /roshaa
+touch /file1
+EOH
+end
+
+
+
+creating a user:
+
+user "roshaa" do
+action :create
+end
+
+
+
+creating a group:
+
+group "mygroup" do
+action :create
+members "roshaa"
+append true
+end
+
+
+
+From one cookbook, only one recipe can be run at a time. 
+However, multiple recipes can be run by including all the other recipes in the default recipe
+
+
+Running multiple recipes:
+
+chef-client -zr "recipe[test-cookbook::test-recipe],recipe[test-cookbook::test-recipe]"
+
+
+Including multiple recipes in the default recipe:
+
+include_recipe "test-cookbook::test-recipe1"
+include_recipe "test-cookbook::test-recipe2"
+include_recipe "test-cookbook::test-recipe3"
+
+
+Running default recipes:
+
+chef-client -zr "recipe[test-cookbook::default],recipe[test-cookbook::default]"
+
+or 
+
+chef-client -zr "recipe[test-cookbook],recipe[test-cookbook]"
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> bootstrapping <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+The process of connecting nodes with the server is known as bootstrapping. This process automatically
+installs chef on the nodes.
+
+
+	>>>>>>>>>>>>>>>>>>>> connecting chef workstation with chef server <<<<<<<<<<<<<<<<<<<<
+
+create an account on manage.chef.io and download the starter kit which will have "chef-repo" directory 
+that allows to connect with the chef server.
+Download "winscp" to connect windows with the remote linux machine (chef workstation)
+copy "chef-repo" directory to the chef workstation in the home directory
+everything needs to be done in "chef-repo" directory
+
+knife ssl check : to check if chef workstation is connected with the server or not
+
+
+
+	>>>>>>>>>>>>>>>>>>>> connecting chef workstation with nodes <<<<<<<<<<<<<<<<<<<<
+
+AZ of workstation and nodes must be same
+
+In advanced details of the nodes, add:
+
+#!/bin/bash
+sudo su
+yum update -y
+
+
+node-key.pem has to be there in chef-repo directory of the chef workstation
+
+
+creating a node:
+
+knife bootstrap <<node_private_ip>> --ssh-user ec2-user --sudo -i <<key_name>> -N <<desired_node_name>>
+
+
+checking the nodes:
+
+knife node list
+
+
+there should be only one cookbooks folder and that too in the chef-repo folder
+
+
+to upload a cookbook to the server:
+
+knife cookbook upload apache-cookbook
+
+
+to check if uploaded on server or not:
+
+knife cookbook list 
+
+
+to delete a cookbook from the server:
+
+knife cookbook delete <<cookbook_name>> -y
+
+
+to delete a node from the server:
+
+knife node delete <<node_name>> -y
+
+
+to check the chef-clients connected with the server:
+
+knife client-list
+
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>> adding a recipe to the node <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+The recipe is updated at the workstation and uploaded to the server. Every node maintains a run_list in
+which the recipes of a cookbook need to be updated.
+Now whenever there will be a change in the recipe, the node associated with it will automatically get
+updated.
+
+
+knife node run_list set ChefNode1 "recipe[apache-cookbook::apache-recipe]"
+
+
+to check the recipes of a node:
+
+knife node show ChefNode1
+
+
+Code from the workstation needs to be uploaded on the server
+
+From node, to pull the changes:
+
+chef-client
+
+
+to automate the pulling of the changes by the nodes, from the node:
+
+vi /etc/crontab
+
+* * * * * <<user_name>> <<command>>
+
+* * * * * root chef-client : to execute the command per minute
+
+*/2 * * * * root chef-client : to execute the command per 2 minutes
+
+
+
+	>>>>>>>>>>>>>>>>>>>>>>> automating a fresh machine <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+launch a new node and add the following in the advanced details:
+
+#!/bin/bash
+sudo su
+yum update -y
+echo "* * * * * root chef-client" >> /etc/crontab
+
+attach it with the server using bootstrap command
+
+knife bootstrap <<node_private_ip>> --ssh-user ec2-user --sudo -i <<key_name>> -N <<desired_node_name>>
+
+
+add the recipe in the run_list of the machine:
+
+knife node run_list set ChefNode3 "recipe[apache-cookbook::apache-recipe]"
+
+
+now just change the code in the recipe and upload it on the server. It will be reflected on all the connected nodes
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> roles <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+instead of directly adding the cookbook in the run_list of the node, we will add the cookbook in the role
+and then add the role in the run_list of the node. In future, if we need to add a new cookbook in the 
+run_list of the nodes, we just need to add that cookbook in the role and all the nodes will update themselves
+automatically
+by default, a role with the name "starter.rb" is present
+
+to create a sample role:
+
+vi myrole.rb
+
+name "myrole.rb"
+description "description comes here"
+run_list "recipe[apache-cookbook::apache-recipe]"
+
+
+to add multiple recipes:
+
+run_list "recipe[apache-cookbook::apache-recipe]","recipe[test-cookbook::test-recipe]"
+
+
+to add all the recipes of a cookbook:
+
+run_list "recipe[apache-cookbook]"
+
+
+to upload the role on the server:
+
+knife role from file roles/<<role_name>>.rb
+
+
+to check the roles:
+
+knife role list
+
+
+to add role in the run_list of the nodes:
+
+knife node run_list set <<node_name>> "role[<<role_name>>]"
+
+
+===========================================================================
+
+to install multiple packages in the linux machine:
+
+%w(httpd unzip git vim) .each do |p|
+package p do 
+action :install
+end 
+end
+
+===========================================================================
+
+

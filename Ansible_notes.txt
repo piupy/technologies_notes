@@ -1,0 +1,392 @@
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Ansible notes <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+It is also a configuration management tool just like chef but is based on push based mechanism
+
+ansible package link:
+
+wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
+yum install epel-release-latest-7.noarch.rpm -y
+
+yum install git python python-level python-pip openssl ansible -y
+
+yum update -y
+
+
+add following commands in the server as well as nodes:
+
+#!/bin/bash
+sudo su
+yum update -y
+
+
+we need to make a group in the server so that in future, we can manage all the nodes through that group only
+
+vi /etc/ansible/hosts	>>>>>>>>> to add the private IPs of the nodes in the server
+
+
+# Ex 1: Ungrouped hosts, specify before any group headers.
+
+[demo]			>>>>>>>>> name of the group
+172.31.38.64		>>>>>>>>> node1 private IP
+172.31.38.121		>>>>>>>>> node 2 private IP
+
+## green.example.com
+
+
+But by default, it is disabled and changes will not be reflected. So, we need to uncomment "inventory"
+and "sudo_user" so that their changes get reflected.
+
+vi /etc/ansible/ansible.cfg
+
+
+create a user on the server as well as all the nodes with the same name:
+
+adduser ansibleuser
+
+passwd ansibleuser
+
+
+change user in all the machines:
+
+su - ansibleuser
+
+
+give sudo rights to this user so that it can install packages on the machines
+
+visudo		>>>>>> as root user
+
+## Allow root to run any commands anywhere
+root    ALL=(ALL)       ALL
+ansibleuser ALL=(ALL) NOPASSWD: ALL		>>>>>>>>>>>>>> add this
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>> pushing files on the nodes <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+on the server as well as nodes, login as root:
+
+vi /etc/ssh/sshd_config
+
+
+uncomment "PermitRootLogin", :
+
+
+# Authentication:
+
+#LoginGraceTime 2m
+PermitRootLogin yes
+
+
+
+change the following from:
+
+# To disable tunneled clear text passwords, change to no here!
+#PasswordAuthentication yes
+#PermitEmptyPasswords no
+PasswordAuthentication no
+
+to 
+
+# To disable tunneled clear text passwords, change to no here!
+PasswordAuthentication yes
+#PermitEmptyPasswords no
+#PasswordAuthentication no
+
+
+so as to make the changes, restart the sshd service on server as well as nodes:
+
+service sshd restart
+
+
+now ssh into the nodes using "ansibleuser":
+
+ssh <<private_IP_of_node>>
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>> creating a ssh key <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>> ssh-keygen
+
+id_rsa : private key
+
+id_rsa.pub : public key
+
+
+>>> ssh-copy-id <<user_name>>@<<private_IP_of_node>>
+
+
+create keys for all the nodes
+
+
+
+to check the nodes connected with the server:
+
+ansible all --list-hosts
+
+
+to check the nodes of a particular group connected with the server:
+
+ansible <<group_name>> --list-hosts
+
+ansible demo[0:1] --list-hosts		>>>>>> first 2 nodes
+
+ansible demo[0:4] --list-hosts		>>>>>> first 5 nodes (last index inclusive)
+
+ansible demo[-1] --list-hosts		>>>>>> last node
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ad-hoc commands <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+these are simple linux commands but doesn't have idempotency and hence gets executed each time
+
+
+ansible <<group_name>> -a "<<linux_command>>"
+
+ansible demo -a "ls"
+
+ansible all -a "ls"
+
+ansible all -a "touch file1"  >>>  to create a file on all the nodes
+
+ansible all -a "sudo yum install httpd -y"  >>>  to install httpd package on all the nodes
+
+or  
+
+ansible all -ba "yum install httpd -y"
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> modules <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+commands meant for a single use
+
+present >>> to install
+absent >>> to uninstall
+latest >>> to update
+
+ansible <<group_name>> -b -m <<module_name>> -a "pkg=<<package_name>> state=<<state>>"
+
+
+ansible demo -b -m yum -a "pkg=httpd state=present"  	>>> (ssh keys need to exist)
+
+"present" is by default and hence can be skipped
+
+
+ansible demo -b -m service -a "name=httpd state=started"  	>>> to start a service
+
+ansible demo -b -m copy -a "src=serverfile dest=/tmp"  	>>> to copy a file on the nodes from server
+
+
+ansible demo -m setup   >>>  to check the setup
+
+ansible demo -m setup -a "filter=*ipv4*"   >>> to check the IP address of the nodes
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> playbooks <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+it is similar to recipes of chef
+
+su - ansibleuser
+
+vi target.yml
+
+--- # My first YAML playbook
+- hosts: demo
+  user: ansibleuser
+  become: yes
+  connection: ssh
+  gather_facts: yes
+
+
+to execute a playbook:
+
+ansible-playbook target.yml
+
+
+
+to install httpd as well:
+
+--- # My first YAML playbook
+- hosts: demo
+  user: ansibleuser
+  become: yes
+  connection: ssh
+  tasks:
+          - name: Install HTTPD
+            action: yum name=httpd state=installed
+
+
+	>>>>>>>>>>>>>>>>>>>>>>> using variables <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+--- # My first YAML playbook
+- hosts: demo
+  user: ansibleuser
+  become: yes
+  connection: ssh
+  vars:
+          pkgname: httpd
+  tasks:
+          - name: Install HTTPD
+            action: yum name="{{pkgname}}" state=present
+
+
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>> handlers <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+they are used when we need to install dependencies
+
+"notify" has to be there to show that there exists a dependency
+
+contents of "notify" present in tasks and "name" present in handlers must be same so as to establish dependency
+
+--- # My first YAML playbook
+- hosts: demo
+  user: ansibleuser
+  become: yes
+  connection: ssh
+  vars:
+          pkgname: httpd
+  tasks:
+          - name: Install HTTPD
+            action: yum name="{{pkgname}}" state=present
+            notify: restart httpd
+  handlers:
+          - name: restart httpd
+            action: service name=httpd state=restarted
+
+
+for dryrun:
+
+ansible-playbook task.yml --check
+
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> loops <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+the following loop will run on all the nodes
+
+
+--- # My first YAML playbook
+- hosts: demo
+  user: ansibleuser
+  become: yes
+  connection: ssh
+  vars:
+          pkgname: httpd
+  tasks:
+          - name: Install HTTPD
+            action: yum name="{{pkgname}}" state=present
+            notify: restart httpd
+
+          - name: Create users
+            user: name="{{item}}" state=present
+            with_items:
+                    - usr7
+                    - usr8
+  handlers:
+          - name: restart httpd
+            action: service name=httpd state=restarted
+
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> conditions <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+--- # My first YAML playbook
+- hosts: demo
+  user: ansibleuser
+  become: yes
+  connection: ssh
+  tasks:
+          - name: Install Apache for Debian
+            command: apt-get install apache2 -y
+            when: ansible_os_family == "Debian"
+
+          - name: Install Apache for RedHat
+            command: yum install httpd -y
+            when: ansible_os_family == "RedHat"
+
+
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> vault <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+it is used to encrypt a yml file
+
+ansible-vault create vault.yml	>>>>> to create and encrypt a file at the same time
+
+ansible-vault edit vault.yml   >>>>>> to edit the encrypted file
+
+ansible-vault rekey vault.yml   >>>>> to change the password of the file
+
+ansible-vault encrypt vault.yml   >>>>>> to encrypt a normal yml file
+
+ansible-vault decrypt vault.yml   >>>>> to decrypt an encrypted file
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> roles <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+it is used to arrange the code of the playbook efficiently
+
+
+		
+					playbook
+					    |
+	----------------------------------------------------------------------------
+	|									    |
+	|									    |
+    master.yml									  roles
+										    |
+										    |
+										  webserver
+										    |
+										  tasks
+										    |___ main.yml
+										    |
+										  vars
+										    |___ main.yml
+										    |
+										  handlers
+										    |___ main.yml
+
+
+						
+	
+
+
+vi master.yml
+
+
+--- # master playbook
+- hosts: demo
+  user: ansibleuser
+  become: yes
+  connection: ssh
+  roles:
+          - webserver
+
+
+
+
+
+
+vi roles/webserver/tasks/main.yml
+
+
+- name: install HTTPD
+  yum: pkg=httpd state=latest
+
+
+
+ansible-playbook master.yml
+
+
+

@@ -1,0 +1,303 @@
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Django deployment on AWS using NGINX and GUNICORN <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+1. Setup django app
+
+	folder structure should be:
+
+		__ env
+	        __ src
+		   |
+		   |__ app
+		   |__ project
+		   |__ manage.py
+
+
+2. Setup an EC2 instance (ubuntu) on AWS
+
+3. chmod 400 keypair.pem
+
+4. Connect to that instance using cmd
+
+5. Connect with winscp
+
+6. Transfer the required files to the remote ubuntu server using winscp
+
+alternatively using cmd, we can transfer the files by following command:
+
+scp -i "C:\Users\HP\Desktop\key21.pem" "C:\Users\HP\Desktop\aws_site\project.zip" ubuntu@13.235.244.175:/home/ubuntu
+
+>>> "unzip project.zip" to unzip at remote server
+
+7. sudo apt-get update -y
+
+8. sudo apt-get install python3-pip python3.8-venv nginx -y
+
+9. python3 -m venv <<env_name>>
+
+10. source <<env_name>>/bin/activate
+
+11. pip3 install django gunicorn
+
+12. pip3 install -r requirements.txt
+
+13. In the settings.py file, paste the public IP of the machine in ALLOWED_HOSTS 
+
+14. python manage.py makemigrations
+    python manage.py migrate
+
+15. Allow 8000 port in the security group of AWS
+
+16. python3 manage.py runserver 0.0.0.0:8000 (test using development server)
+
+17. gunicorn --bind 0.0.0.0:8000 project.wsgi (test using gunicorn)
+
+18. deactivate (to come out of virtualenv)
+
+19. sudo vi /etc/systemd/system/gunicorn.socket
+
+20. paste the following in the file:
+
+[Unit]
+Description=gunicorn socket
+
+[Socket]
+ListenStream=/run/gunicorn.sock
+
+[Install]
+WantedBy=sockets.target
+
+21. sudo vi /etc/systemd/system/gunicorn.service
+
+22. paste the following in the file:
+
+[Unit]
+Description=gunicorn daemon
+Requires=gunicorn.socket
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/src
+ExecStart=/home/ubuntu/env/bin/gunicorn \
+          --access-logfile - \
+          --workers 3 \
+          --bind unix:/run/gunicorn.sock \
+          project.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
+
+23. sudo systemctl start gunicorn.socket
+
+24. sudo systemctl enable gunicorn.socket
+
+25. sudo vi /etc/nginx/sites-available/djangosite
+
+26. paste the following in the file:
+
+server {
+    listen 80;
+    server_name <<public_IP>>;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location /static/ {
+        root /home/ubuntu/src;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/run/gunicorn.sock;
+    }
+}
+
+27. sudo ln -s /etc/nginx/sites-available/djangosite /etc/nginx/sites-enabled/
+
+28. sudo systemctl restart nginx
+
+29. cd /etc/nginx/sites-available/
+
+30. sudo rm -rf default
+
+31. cd /etc/nginx/sites-enabled/
+
+32. sudo rm -rf default
+
+33. sudo systemctl restart nginx
+
+34. sudo systemctl restart gunicorn
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> END <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Django deployment on "Heroku" server <<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+Create an account on heroku. Install heroku CLI from its website
+ 
+In cmd >>>  heroku login
+
+Install django
+
+In "manage.py" path, run the server.
+
+In "manage.py" path, create a file with the name "Procfile" and paste >>>  web: gunicorn <<project_name>>.wsgi  
+
+pip install gunicorn
+
+pip install django-heroku
+
+In "settings.py" file, paste 
+
+import django_heroku 			# at the top
+
+django_heroku.settings(locals()) 	# at the end
+
+To see the list of pip packages >>>  pip freeze 
+
+In "manage.py" path >>>    pip freeze > requirements.txt
+
+cmd >>> heroku create <<desired_app_name>>
+
+The app link will be shared by heroku.
+
+In "manage.py" path:
+
+git init
+
+git add .
+
+git commit -m "comments here"
+
+heroku git:remote -a <<desired_app_name>>
+
+git push heroku master
+
+======================================================================================================
+
+In case, we don't have anything in the static folder, run: 
+
+>>> heroku config:set DISABLE_COLLECTSTATIC=1
+
+and then run "git push heroku master" once again
+
+=======================================================================================================
+
+heroku repository can now be cloned from "https://git.heroku.com/<<desired_app_name>>.git"
+
+heroku run bash
+
+ls/dir
+
+To push the database files as well >>>    python manage.py migrate 
+
+Now, reload the website. It will be rendered with blank database.
+
+Create a superuser to access the admin panel (in the bash only) >>>  python manage.py createsuperuser
+
+Now, admin panel can also be accessed.
+
+Add some records in the remote tables.
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> END <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Django Deployment on AWS EBS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> for django 2.1.1 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+>>> pip install awsebcli
+
+>>> conda create -n <<env_name>> python=3.6
+
+>>> conda activate <<env_name>> (and link the interpreter)
+
+>>> pip install django==2.1.1
+
+>>> django-admin startproject <<project_name>>
+
+>>> cd <<project_name>>
+
+>>> python manage.py runserver
+
+stop the server
+
+>>> pip freeze > requirements.txt
+
+>>> mkdir .ebextensions
+
+create a file "django.config" in the folder ".ebextensions" and paste the following code in it:
+
+option_settings:
+  aws:elasticbeanstalk:container:python:
+    WSGIPath: <<project_name>>/wsgi.py
+
+>>> conda deactivate
+
+>>> eb init -p python-3.6 <<app_name>>		# this name will not appear anywhere
+
+>>> eb init
+
+>>> eb create <<env_name>>			# this name will appear in the url
+
+>>> eb status					# to get the url (CNAME)
+
+the app will be appeared in the us-west-2 region (Oregon)
+
+add the <<app_name>> in the ALLOWED_HOSTS section in settings.py file
+
+>>> eb deploy
+
+>>> python manage.py migrate
+
+>>> python manage.py createsuperuser
+
+in settings.py file:  
+
+STATIC_ROOT = 'static'
+
+>>> python manage.py collectstatic
+
+>>> eb deploy
+
+>>> eb open
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>> to make changes in the database <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+create a file "db-migrate.config" in the ".ebextensions" folder and paste the following code in that:
+
+container_commands:
+  01_migrate:
+    command: "django-admin.py migrate"
+    leader_only: true
+option_settings:
+  aws:elasticbeanstalk:application:environment:
+    DJANGO_SETTINGS_MODULE: <<project_name>>.settings
+
+
+>>> eb deploy
+
+
+>>> eb terminate <<env_name>>		# to terminate the website
+
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> End <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
